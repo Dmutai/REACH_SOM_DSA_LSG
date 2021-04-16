@@ -107,8 +107,8 @@ data_indicators <- data %>% mutate (
   # when it should be NA
   snfi_nc_index8 = case_when(
   
-    rowSums(across(c(shelter_flood_destroyed,shelter_fire_destroyed)),na.rm = T)/
-      cccm_populationestimates_shelters == 0 ~ as.numeric(NA),
+    # rowSums(across(c(shelter_flood_destroyed,shelter_fire_destroyed)),na.rm = T)/
+    #   cccm_populationestimates_shelters == 0 ~ as.numeric(NA),
     
     rowSums(across(c(shelter_flood_destroyed,shelter_fire_destroyed)),na.rm = T)/
       cccm_populationestimates_shelters <=0.25 ~ 0,
@@ -719,18 +719,19 @@ data_indicators <- data_indicators %>%
 data_indicators <- data_indicators %>% 
   
   mutate(
-    number_of_needs = rowSums(select(., protection_need, wash_need, health_need, education_need, fs_need, nutrition_need, snfi_need), na.rm=T)
+      number_of_needs = rowSums(select(., protection_need, wash_need, health_need, education_need, fs_need, nutrition_need, snfi_need), na.rm=T)
   )
 
 
 output <- data_indicators %>% select(
+                          "idp_code",
                           matches("index[[:digit:]]"),
                           ends_with("_score"),
                           ends_with("_need"),
                           number_of_needs) 
 
 
-write.csv(output,'LSG_output_15_04.csv',row.names = F)
+write.csv(output,'data_lsg.csv',row.names = F)
 
 
 
