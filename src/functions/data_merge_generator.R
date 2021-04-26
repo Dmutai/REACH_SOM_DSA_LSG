@@ -26,7 +26,7 @@ data_merge_gen <- function(data,questionnaire,questions,choices,group,df_name,df
           x <- c(x,ch)
         }
         if(length(list_of_choices)>3){
-          for (i in 1:3) {
+          for (i in 1:4) {
             ch = sprintf("%s_top_%d_name = select_percents(%s, %d, ., questions, choices, 'label', group = !!get_group(.)),",
                          question,i,question,i)
             x <- c(x,ch)
@@ -48,7 +48,7 @@ data_merge_gen <- function(data,questionnaire,questions,choices,group,df_name,df
       
     }
     else{
-      if (str_detect(question,pattern = "(_nc_|_need$)") &
+      if (str_detect(question,pattern = "(_nc_index|_need$)") &
           !str_detect(question,pattern = "\\.")) {
         for (i in 0:1) {
           ch = sprintf("%s_%s = percent_response(%s, .,'%s', group = !!get_group(.)),",
@@ -60,7 +60,7 @@ data_merge_gen <- function(data,questionnaire,questions,choices,group,df_name,df
         }
       }
       
-      else if (str_detect(question,pattern = "(_index|number_of_needs)")&
+      else if (str_detect(question,pattern = "(_index|number_of_needs|_score)")&
                !str_detect(question,pattern = "\\.")) {
         scores <- data %>% pull(question) %>% unique() %>% sort()
         for (i in scores) {
