@@ -9,7 +9,6 @@ p_load(rio,
        hypegrammaR,
        composr)
 
-# setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
 
 source("./src/functions/aggregation_script_functions.R")
 
@@ -18,7 +17,7 @@ source("./src/functions/aggregation_script_functions.R")
 
 ## Loading the dataset and questionnaire
 dataFilePath = "input/clean data/clean_data_validated.csv" 
-data <- import(dataFilePath)  
+data <- read.csv(dataFilePath)  
 koboToolPath = "input/kobo tool/kobo_tool_modified.xlsx"
 questions = import(koboToolPath,sheet="survey") %>% select(-1) %>% filter(!is.na(name))
 
@@ -42,7 +41,9 @@ data[multipleSelectQuestions] <- sapply(data[multipleSelectQuestions],as.numeric
 
 data$ki_gender[data$ki_gender == "Female"] <- "female" 
 
+
 data [data == 999] <- NA
+
 data [data == ""] <- NA
 data [data == "dnk"] <- NA
 
@@ -473,7 +474,7 @@ all_questions_output <- all_questions_output %>% mutate(
    )
 
 
-write.csv(all_questions_output,"output/Aggregation/aggregation_output_updated_v2.csv",
+write.csv(all_questions_output,"output/Aggregation/aggregation_output.csv",
           na = "NA",row.names = F)
 
 

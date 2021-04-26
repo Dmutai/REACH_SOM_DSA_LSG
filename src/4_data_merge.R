@@ -12,7 +12,8 @@ p_load(rio,
 source("src/functions/data_merge_functions.R")
 source("src/functions/data_merge_generator.R")
 
-data <- read.csv("input/clean data/data_with_lsg.csv",stringsAsFactors = F)
+data <- read.csv("output/Indicators/aggregation_output_plus_lsg.csv",stringsAsFactors = F)
+
 
 koboToolPath = "input/kobo tool/kobo_tool_modified.xlsx"
 
@@ -3850,7 +3851,7 @@ data_merge_output <- data_merge_output %>%
 
 ###### Exporting the results ###### 
 
-write.csv(data_merge_output,"output/data_merge_output.csv",row.names = F)
+write.csv(data_merge_output,"output/Data merge/data_merge_output.csv",row.names = F)
 
 
   

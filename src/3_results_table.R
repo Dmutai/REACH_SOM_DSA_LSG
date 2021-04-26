@@ -17,7 +17,8 @@ source("src/functions/results_table_functions.R")
 koboToolPath = "input/kobo tool/kobo_tool_modified.xlsx"
 
 
-data <- read.csv("input/clean data/data_with_lsg.csv",stringsAsFactors = F)
+data <- read.csv("output/Indicators/aggregation_output_plus_lsg.csv",stringsAsFactors = F)
+
 
 questions = import(koboToolPath,sheet="survey") %>% select(-1) %>% filter(!is.na(name))
 
@@ -65,6 +66,6 @@ dataForAnalysis <- data %>% select(-idp_code,-localisation_settlement_name,
 
 
 
-write.csv(results_table,"output/results_table_output.csv", row.names = F)
+write.csv(results_table,"output/Results table/results_table_output.csv", row.names = F)
 
 

@@ -8,9 +8,9 @@ p_load(rio,
        hypegrammaR,
        composr)
 
-# setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
 
-data <- read.csv("input/clean data/DSA_aggregated_data.csv",stringsAsFactors = F)
+data <- read.csv("output/Aggregation/aggregation_output.csv",stringsAsFactors = F)
+
 
 # data[data=="dnk"] <- NA
 # data[data=="NC"] <- NA
@@ -735,7 +735,7 @@ output <- data_indicators %>% select(
                           number_of_needs) 
 
 
-write.csv(data_indicators,'output/data_with_lsg.csv',row.names = F)
+write.csv(data_indicators,'output/Indicators/aggregation_output_plus_lsg.csv',row.names = F)
 
 
 
