@@ -13,8 +13,8 @@ setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
 
 data <- read.csv("DSA_aggregated_data.csv",stringsAsFactors = F)
 
-data[data=="dnk"] <- NA
-data[data=="NC"] <- NA
+# data[data=="dnk"] <- NA
+# data[data=="NC"] <- NA
 
 data_indicators <- data %>% mutate (
   ##### SNFI - Non Critical##### 
@@ -88,16 +88,16 @@ data_indicators <- data %>% mutate (
   #should it be the buul, solid_apartment, unfinished, make_shit, none which are the % of the households?
   
   ###ASSIL I think the % in here means the number of a set of options selected par rapport all of the options 
-   snfi_nc_index7 = case_when(
-    rowSums(across(c(shelter_types.buul,shelter_types.tent,shelter_types.shelter_kit)))/
-      rowSums(across(starts_with("shelter_types."))) > 0.5 ~ 1,
-    
-    rowSums(across(c(shelter_types.timber_plastic_cgi,shelter_types.cgi_wall_roof,
-                     shelter_types.mud_stick_cgi,shelter_types.plywood_cgi,
-                     shelter_types.stone_brick_cgi1,shelter_types.stone_brick_cgi2)))/
-      rowSums(across(starts_with("shelter_types."))) > 0.5 ~ 0,
-
-  ),
+  #  snfi_nc_index7 = case_when(
+  #   rowSums(across(c(shelter_types.buul,shelter_types.tent,shelter_types.shelter_kit)))/
+  #     rowSums(across(starts_with("shelter_types."))) > 0.5 ~ 1,
+  #   
+  #   rowSums(across(c(shelter_types.timber_plastic_cgi,shelter_types.cgi_wall_roof,
+  #                    shelter_types.mud_stick_cgi,shelter_types.plywood_cgi,
+  #                    shelter_types.stone_brick_cgi1,shelter_types.stone_brick_cgi2)))/
+  #     rowSums(across(starts_with("shelter_types."))) > 0.5 ~ 0,
+  # 
+  # ),
   
   #### SNFI index 8
   ###YS why is 0 coded as NA; have the prop equals to zero should mean 0; hence 0 and not NA? 
@@ -132,9 +132,13 @@ data_indicators <- data %>% mutate (
   ###YS river and other are missing
   #could share the list of improved and un-improved water sources.
   ###ASSIL I shared the list on the excel file and updated the vectors here 
+  
   wash_index1 = case_when(
     sm_selected(water_treatment_methods,none=c("boiling", "cloth_filter", "other_filter", "aquatabs") ) &
-      water_sources_primary %in%  c("unprot_well", "berkad", "river") ~ 3,
+      water_sources_primary %in%  c("river") ~ 4,
+    
+    sm_selected(water_treatment_methods,none=c("boiling", "cloth_filter", "other_filter", "aquatabs") ) &
+      water_sources_primary %in%  c("unprot_well", "berkad") ~ 3,
     
     sm_selected(water_treatment_methods,any=c("boiling", "cloth_filter", "other_filter", "aquatabs") ) &
       water_sources_primary %in% c("unprot_well", "berkad", "river")  ~ 2,
@@ -417,13 +421,14 @@ data_indicators <- data %>% mutate (
   #### FSL Critical index 2
   ###YS: OK  but hunger_worst has a BIG trend
   ###Assil I'll check that
-  fs_index2 = case_when(
-    hunger_level %in% c("hunger_worst") ~ 5,
-    hunger_level %in% c("hunger_severe") ~ 4,
-    hunger_level %in% c("hunger_small") ~ 2,
-    hunger_level %in% c("no_hunger") ~ 1,
-  ),
   
+  # fs_index2 = case_when(
+  #   hunger_level %in% c("hunger_worst") ~ 5,
+  #   hunger_level %in% c("hunger_severe") ~ 4,
+  #   hunger_level %in% c("hunger_small") ~ 2,
+  #   hunger_level %in% c("no_hunger") ~ 1,
+  # ),
+  # 
   ##### FSL - Non Critical ##### 
   #### FSL Non Critical index 1
   ###YS ok
@@ -614,7 +619,7 @@ data_indicators <- data %>% mutate (
 ##### Computing LSGs ##### 
 ### Following the MSNA guidance for sectoral analysis 
 
-snfi_non_critical_indicators <- c("snfi_nc_index1", "snfi_nc_index2", "snfi_nc_index3", "snfi_nc_index4", "snfi_nc_index5", "snfi_nc_index6", "snfi_nc_index7", "snfi_nc_index8", "snfi_nc_index9")
+snfi_non_critical_indicators <- c("snfi_nc_index1", "snfi_nc_index2", "snfi_nc_index3", "snfi_nc_index4", "snfi_nc_index5", "snfi_nc_index6", "snfi_nc_index8", "snfi_nc_index9")
 
 
 wash_critical_indicators <- c("wash_index1","wash_index2","wash_index3")
@@ -630,7 +635,7 @@ nutrition_critical_indicators <- c("nutrition_index1")
 nutrition_non_critical_indicators <- c("nutrition_nc_index1", "nutrition_nc_index2")
 
 
-fs_critical_indicators <- c("fs_index1","fs_index2")
+fs_critical_indicators <- c("fs_index1")
 fs_non_critical_indicators <- c("fs_nc_index1", "fs_nc_index2", "fs_nc_index3")
 
 
