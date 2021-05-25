@@ -7,17 +7,19 @@ p_load(rio,
        koboquest,
        crayon,
        hypegrammaR,
+       xlsx,
        composr)
 
+ 
 
-source("./src/functions/aggregation_script_functions.R")
+source("src/functions/aggregation_script_functions.R")
 
 
 ##### Loading dataset and preprocessing ##### 
 
 ## Loading the dataset and questionnaire
 dataFilePath = "input/clean data/clean_data_validated.csv" 
-data <- read.csv(dataFilePath)  
+data <- import(dataFilePath)  
 koboToolPath = "input/kobo tool/kobo_tool_modified.xlsx"
 questions = import(koboToolPath,sheet="survey") %>% select(-1) %>% filter(!is.na(name))
 
@@ -31,7 +33,7 @@ colnames(data) <- gsub("/",".",colnames(data))
 
 ## Making sure that numerical questions are parsed as numerical variables in the data /
 ## Same for select multiple choices 
-listOfNumericQuestions <- questions %>% filter(type %in% c("integer","numeric","calculate")) %>% pull(name)
+listOfNumericQuestions <- questions %>% filter(type %in% c("integer","numeric","calculate","geopoint")) %>% pull(name)
 
 numericQuestions_index <- which(colnames(data) %in% listOfNumericQuestions)
 data[numericQuestions_index] <- sapply(data[numericQuestions_index],as.numeric)
@@ -41,14 +43,12 @@ data[multipleSelectQuestions] <- sapply(data[multipleSelectQuestions],as.numeric
 
 data$ki_gender[data$ki_gender == "Female"] <- "female" 
 
-
 data [data == 999] <- NA
-
 data [data == ""] <- NA
 data [data == "dnk"] <- NA
 
 
-  
+
 data <- data %>%  new_recoding(target = nfi_access_dist_min_int_rec) %>%
   recode_to(to = "zero", where = nfi_access_dist_min_int == 0 ) %>% 
   recode_to(to = "fifteen", where = nfi_access_dist_min_int == 15 ) %>% 
@@ -131,10 +131,10 @@ select_multiple_output <- cbind(aggregation_output_select_multiple[,1],select_mu
 
 ## Cleaning the env
 rm(list = c("i", "aggregation_output_select_multiple", 
-  "select_multiple_output_formatting",
-  "select_multiple",
-  "sm_binary", "sm",
-  "sm_formatted_and_binary", "sm_list"))
+            "select_multiple_output_formatting",
+            "select_multiple",
+            "sm_binary", "sm",
+            "sm_formatted_and_binary", "sm_list"))
 
 ##### Select one aggregation ##### 
 
@@ -158,11 +158,11 @@ select_one_yes <- import("input/aggregation/master_list.xlsx") %>%
 
 
 select_one_output <- merge(
-data %>% group_by(.dots =aggregation_columns) %>% 
-  dplyr::summarize_at(.vars = select_one_mode,.funs = fn_select_one_mode) ,
-
-data %>% group_by(.dots =aggregation_columns) %>% 
-  dplyr::summarize_at(.vars = select_one_yes,.funs = fn_select_one_yes_prevalence) 
+  data %>% group_by(.dots =aggregation_columns) %>% 
+    dplyr::summarize_at(.vars = select_one_mode,.funs = fn_select_one_mode) ,
+  
+  data %>% group_by(.dots =aggregation_columns) %>% 
+    dplyr::summarize_at(.vars = select_one_yes,.funs = fn_select_one_yes_prevalence) 
 )
 
 
@@ -189,11 +189,14 @@ numerical_questions_mode_subset <- import("input/aggregation/master_list.xlsx") 
   pull(name)
 
 
+
 numerical_values_output_all <- data %>% group_by(.dots =aggregation_columns) %>% 
   dplyr::summarize_at(.vars = numerical_questions_mode_all,.funs = one_sd_mean) 
 
+
 numerical_values_output_subset <- data %>% group_by(.dots =aggregation_columns) %>% 
   dplyr::summarize_at(.vars = numerical_questions_mode_subset,.funs = one_sd_mean_subset) 
+
 
 
 numerical_values_output <- merge(
@@ -208,7 +211,7 @@ numerical_values_output <- numerical_values_output %>%  new_recoding(target = cc
   recode_to(to = "1_year_2_years", where = cccm_site_duration >=12 & cccm_site_duration <24 ) %>%
   recode_to(to = "2_year_5_years", where = cccm_site_duration >=24 & cccm_site_duration <60 ) %>%
   recode_to(to = "more_than_5_years", where = cccm_site_duration >=60 ) %>% 
-end_recoding()  
+  end_recoding()  
 
 
 numerical_values_output$cccm_site_duration <- numerical_values_output$cccm_site_duration_rec
@@ -226,8 +229,8 @@ rm(list = c("numerical_questions_mode_all",
 ######### Merge outputs ######### 
 
 all_questions_output <- Reduce(function(...) merge(..., all=TRUE), list(select_one_output, 
-                                                select_multiple_output,
-                                                numerical_values_output))
+                                                                        select_multiple_output,
+                                                                        numerical_values_output))
 
 all_questions_output <- subset(all_questions_output, select=lapply(colnames(data), match,table=colnames(all_questions_output)) %>% 
                                  unlist() %>%
@@ -423,18 +426,21 @@ all_questions_output <- all_questions_output %>% mutate(
 )
 
 
+
+
+
 #### Adding settelments names to the aggregated data
- settlement_names <- data %>% select(idp_code,localisation_settlement_name) %>% 
+settlement_names <- data %>% select(idp_code,localisation_settlement_name) %>% 
   mutate(localisation_settlement_name = tools::toTitleCase(tolower(str_squish(localisation_settlement_name)))) %>% 
   unique() %>% 
   group_by(idp_code) %>% 
-   summarise(
-     localisation_settlement_name = paste(localisation_settlement_name,collapse = " / ")
-   )
- 
- 
- all_questions_output <- merge(all_questions_output,settlement_names)%>% select(1,ncol(all_questions_output)+1,2:ncol(all_questions_output))
- all_questions_output[all_questions_output == ""] <- NA
+  summarise(
+    localisation_settlement_name = paste(localisation_settlement_name,collapse = " / ")
+  )
+
+
+all_questions_output <- merge(all_questions_output,settlement_names)%>% select(1,ncol(all_questions_output)+1,2:ncol(all_questions_output))
+all_questions_output[all_questions_output == ""] <- NA
 
 # survey_data$type <- "0_Original_survey"
 # all_questions_output$type <- "1_Aggregated_survey"
@@ -447,36 +453,35 @@ all_questions_output <- all_questions_output %>% mutate(
 # 
 # write.csv(survey_data,"output/survey_data.csv",
 #            na = "NA",row.names = F)
- 
+
 #### Fix NC in localisation_district and localisation_region
- 
- all_questions_output <- all_questions_output %>% 
-   mutate(
-     
-     localisation_district = replace(localisation_district, 
-                                     idp_code %in%  c("DSA4_SO1301_004",
-                                                      "DSA4_SO1301_005"), "burco"),
-     
-     localisation_district = replace(localisation_district, 
-                                     idp_code == "DSA4-LJ-01", "marka"),
-     
-     localisation_region = replace(localisation_region, 
-                                     idp_code == "DSA4-LJ-01", "lower_shabelle"),
-     
-     localisation_district = replace(localisation_district, 
-                                     idp_code == "DSA4-SO12-002", "berbera"),
-     
-     localisation_district = replace(localisation_district, 
-                                     idp_code == "DSA4-SO24-140", "baidoa"),
-     
-     localisation_district = replace(localisation_district, 
-                                     idp_code == "DSA4-SO24-221", "diinsoor"),
-   )
+
+all_questions_output <- all_questions_output %>% 
+  mutate(
+    
+    localisation_district = replace(localisation_district, 
+                                    idp_code %in%  c("DSA4_SO1301_004",
+                                                     "DSA4_SO1301_005"), "burco"),
+    
+    localisation_district = replace(localisation_district, 
+                                    idp_code == "DSA4-LJ-01", "marka"),
+    
+    localisation_region = replace(localisation_region, 
+                                  idp_code == "DSA4-LJ-01", "lower_shabelle"),
+    
+    localisation_district = replace(localisation_district, 
+                                    idp_code == "DSA4-SO12-002", "berbera"),
+    
+    localisation_district = replace(localisation_district, 
+                                    idp_code == "DSA4-SO24-140", "baidoa"),
+    
+    localisation_district = replace(localisation_district, 
+                                    idp_code == "DSA4-SO24-221", "diinsoor"),
+  )
 
 
-write.csv(all_questions_output,"output/Aggregation/aggregation_output.csv",
+write.csv(all_questions_output,"output/Aggregation/aggregation_output_updated2405.csv",
           na = "NA",row.names = F)
-
 
 
 
