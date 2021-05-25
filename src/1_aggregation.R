@@ -17,7 +17,7 @@ source("./src/functions/aggregation_script_functions.R")
 
 ## Loading the dataset and questionnaire
 dataFilePath = "input/clean data/clean_data_validated.csv" 
-data <- read.csv(dataFilePath)  
+data <- import(dataFilePath)  
 koboToolPath = "input/kobo tool/kobo_tool_modified.xlsx"
 questions = import(koboToolPath,sheet="survey") %>% select(-1) %>% filter(!is.na(name))
 
@@ -474,7 +474,7 @@ all_questions_output <- all_questions_output %>% mutate(
    )
 
 
-write.csv(all_questions_output,"output/Aggregation/aggregation_output.csv",
+write.csv(all_questions_output,"output/Aggregation/aggregation_output2505.csv",
           na = "NA",row.names = F)
 
 
