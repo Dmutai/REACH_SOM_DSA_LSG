@@ -474,7 +474,7 @@ all_questions_output <- all_questions_output %>% mutate(
    )
 
 
-write.csv(all_questions_output,"output/Aggregation/aggregation_output2505.csv",
+write.csv(all_questions_output,"output/Aggregation/aggregation_output0706.csv",
           na = "NA",row.names = F)
 
 
